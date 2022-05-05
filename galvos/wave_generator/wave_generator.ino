@@ -4,7 +4,7 @@
 // Interrups are on the only 8-bit port used for the laser DAC
 // so we can't use them for the encoders without port-spanning :(
 #define ENCODER_DO_NOT_USE_INTERRUPTS
-#include <Encoder.h>
+#include <Encoder.h>    // 1.4.2
 Encoder x_encoder(10, 11);
 Encoder y_encoder(12, 13);
 
