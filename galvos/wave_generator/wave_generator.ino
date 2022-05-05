@@ -19,13 +19,8 @@ const byte write_enable_pin = 9;
 const byte DACA = 0;
 const byte DACB = 1;
 
-byte x_freq_hz = 255; 
-byte pre_x_freq_hz = 255;
-byte y_freq_hz = 255;
-byte pre_y_freq_hz = 255;
-
 // sine wavetable
-const int wavetable_samples = 256;
+const int wavetable_samples = 256; // must be same as uint8_t size
 byte wavetable[wavetable_samples];
 
 
@@ -53,14 +48,12 @@ void setup() {
 
 }
 
+
 void loop() {
-    byte x_pos = wave8(x_freq_hz, pre_x_freq_hz);
-    byte y_pos = wave8(y_freq_hz, pre_y_freq_hz);
-    write_dac(DACA, x_pos);
-    write_dac(DACB, y_pos);
-    x_freq_hz = read_encoder(x_encoder);
-    //y_freq_hz = read_encoder(y_encoder);
+    write_dac(DACA, wave8(read_encoder(x_encoder)));
+    write_dac(DACB, wave8(read_encoder(y_encoder)));
 }
+
 
 byte read_encoder(Encoder &the_encoder) {
     int state = the_encoder.read() >> 2;
@@ -83,15 +76,8 @@ void write_dac(bool ab_select, byte value) {
 }
 
 
-uint8_t wave8(uint8_t hz, uint8_t &pre_hz) {
+uint8_t wave8(uint8_t hz) {
     // micros is a uint32_t
-    uint8_t beat = ((micros()) * pre_hz * 4294) >> 24;
-    
-    if (hz != pre_hz) {
-        if (beat == 0){
-            pre_hz = hz;
-        }
-    }
-    
+    uint8_t beat = ((micros()) * hz * 4294) >> 24;
     return wavetable[beat];
 }
