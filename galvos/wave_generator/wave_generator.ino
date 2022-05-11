@@ -1,3 +1,5 @@
+//#include <FastLED.h>
+
 #include <digitalWriteFast.h>
 
 // Encoders used because ADC read and denoise was too slow.
@@ -16,8 +18,9 @@ Encoder y_encoder(12, 13);
 
 const byte dac_select_pin = 8;
 const byte write_enable_pin = 9;
-const byte DACA = 0;
-const byte DACB = 1;
+const byte DAC_A = 0;
+const byte DAC_B = 1;
+const byte laser_pin = A1;
 
 // sine wavetable
 const int wavetable_samples = 256; // must be same as uint8_t size
@@ -37,30 +40,35 @@ void setup() {
     // pins 9      0
     DDRD = B11111111;
 
-    // port B pins 8 and 9 to output
     pinMode(dac_select_pin, OUTPUT);
     pinMode(write_enable_pin, OUTPUT);
+    pinMode(laser_pin, OUTPUT);
 
     // init pin values
     PORTD = 0;
     digitalWriteFast(dac_select_pin, LOW);
     digitalWriteFast(write_enable_pin, HIGH);
+    digitalWriteFast(laser_pin, HIGH);
 
 }
 
 
 void loop() {
-    write_dac(DACA, wave8(read_encoder(x_encoder)));
-    write_dac(DACB, wave8(read_encoder(y_encoder)));
+    write_dac(DAC_A, wave8(read_encoder(x_encoder)));
+    write_dac(DAC_B, wave8(read_encoder(y_encoder)));
+
+//    EVERY_N_MILLISECONDS(100) {
+//  TODO (kwhitfield) add laser and galvo shutoff timer.
+//    }
 }
 
 
 byte read_encoder(Encoder &the_encoder) {
-    int state = the_encoder.read() >> 2;
+    int state = the_encoder.read();
     if (state > 255) {
         state = 255;
-        the_encoder.write(255 << 2);
-    }else if (state < 0) {
+        the_encoder.write(255);
+    } else if (state < 0) {
         state = 0;
         the_encoder.write(0);
     }
@@ -77,7 +85,12 @@ void write_dac(bool ab_select, byte value) {
 
 
 uint8_t wave8(uint8_t hz) {
-    // micros is a uint32_t
+    // converts micros' uint32_t [0 4294967296) to hertz by scaling it so it overflows.
+    // 1e6us is 1 second, so micros() loops every 4294 seconds.
+    // We mult by 4294 so that it overflows every second.
+    // We then keep the top 8 bits so we get a 0-255 saw-wave.
+    // That goes into the wavetable lookup.
+    
     uint8_t beat = ((micros()) * hz * 4294) >> 24;
     return wavetable[beat];
 }
