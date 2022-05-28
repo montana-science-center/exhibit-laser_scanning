@@ -19,8 +19,8 @@
 // so we can't use them for the encoders.
 #define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h>    // 1.4.2
-Encoder x_encoder(7, 8);
-Encoder y_encoder(9, 10);
+Encoder x_encoder(9, 10);
+Encoder y_encoder(12, 11);
 
 // fan outputs 5 and 6 are controled by timer 0
 const byte FAN_1_PIN = 5;
@@ -32,7 +32,7 @@ const byte TAC_1_PIN = 2;
 const byte TAC_2_PIN = 3;
 
 // you'll have to move this if you want pwm
-const byte LASER_PIN = 4;
+const byte LASER_PIN = 7;
 
 
 void setup() {
@@ -56,9 +56,9 @@ byte read_encoder(Encoder &the_encoder) {
     if (state > 255) {
         state = 255;
         the_encoder.write(255);
-    } else if (state < 0) {
-        state = 0;
-        the_encoder.write(0);
+    } else if (state < 7) {
+        state = 7;
+        the_encoder.write(7);
     }
     return (byte)state;
 }
