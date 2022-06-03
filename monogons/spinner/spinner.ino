@@ -31,8 +31,8 @@ const byte knob_deadband = 2;           // encoder ticks before exhibit is consi
 
 
 // HARDWARE CONFIG
-Encoder x_encoder(9, 10);
-Encoder y_encoder(12, 11);
+Encoder x_encoder(10, 9);
+Encoder y_encoder(11, 12);
 const byte FAN_1_PIN = 5;   //both on timer 0
 const byte FAN_2_PIN = 6;
 const byte TAC_1_PIN = 2;
